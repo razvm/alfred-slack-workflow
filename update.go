@@ -3,8 +3,17 @@ package main
 import (
 	aw "github.com/deanishe/awgo"
 	"github.com/slack-go/slack"
+	"strings"
 )
-
+func removeEmptyStrings(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
 func updateChannels() {
 	wf.NewItem("Update Channels").Valid(true)
 
@@ -27,6 +36,21 @@ func updateChannels() {
 			ID:     channel.ID,
 			TeamID: team.ID,
 		})
+	}
+
+	users, err_users := api.GetUsers()
+	if err_users != nil {
+		wf.Warn("Error", "Error occurred in Slack API [users]")
+	}
+
+	for _, user := range users {
+		if !user.Deleted && !user.IsBot {
+			all_channels = append(all_channels, Channel{
+				Name:   strings.Join(removeEmptyStrings([]string{user.RealName, user.Name, user.Profile.DisplayName}), " / "),
+				ID:     user.ID,
+				TeamID: team.ID,
+			})
+		}
 	}
 
 	c.StoreJSON(cache_file, all_channels)
