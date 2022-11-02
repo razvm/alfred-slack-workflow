@@ -2,6 +2,7 @@ package main
 
 import (
 	aw "github.com/deanishe/awgo"
+	"os"
 )
 
 func openChannel() {
@@ -14,10 +15,18 @@ func openChannel() {
 		}
 
 		for _, channel := range c_channels {
-			wf.NewItem(channel.Name).
-				Var("teamID", channel.TeamID).
-				Var("channelID", channel.ID).
-				Valid(true)
+			if _, err := os.Stat(cache_dir + "/" + channel.ID + ".png"); err == nil {
+				wf.NewItem(channel.Name).
+					Var("teamID", channel.TeamID).
+					Var("channelID", channel.ID).
+					Icon(&aw.Icon{Value: cache_dir + "/" + channel.ID + ".png"}).
+					Valid(true)
+			} else {
+				wf.NewItem(channel.Name).
+					Var("teamID", channel.TeamID).
+					Var("channelID", channel.ID).
+					Valid(true)
+			}
 		}
 	}
 

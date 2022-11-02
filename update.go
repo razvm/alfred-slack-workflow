@@ -1,10 +1,16 @@
 package main
 
 import (
+	"errors"
 	aw "github.com/deanishe/awgo"
 	"github.com/slack-go/slack"
+	"io"
+	"log"
+	"net/http"
+	"os"
 	"strings"
 )
+
 func removeEmptyStrings(s []string) []string {
 	var r []string
 	for _, str := range s {
@@ -13,6 +19,32 @@ func removeEmptyStrings(s []string) []string {
 		}
 	}
 	return r
+}
+func downloadFile(URL, fileName string) error {
+	//Get the response bytes from the url
+	response, err := http.Get(URL)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return errors.New("received non 200 response code")
+	}
+	//Create an empty file
+	file, err := os.Create(cache_dir + "/" + fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	//Write the bytes to the file
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 func updateChannels() {
 	wf.NewItem("Update Channels").Valid(true)
@@ -50,6 +82,10 @@ func updateChannels() {
 				ID:     user.ID,
 				TeamID: team.ID,
 			})
+			err := downloadFile(user.Profile.Image192, user.ID+".png")
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
