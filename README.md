@@ -4,7 +4,7 @@ Alfred workflow to open slack channel.
 
 ## Install and setup
 
-1. Download latest version from [here](https://github.com/razvm/alfred-slack-workflow/releases) and import workflow
+1. Download latest version from [here](https://github.com/AdamVyborny/alfred-slack-workflow/releases) and import workflow
 
 2. Get slack token
    1. Create a slack app [here](https://api.slack.com/apps/new)
